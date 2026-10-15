@@ -743,8 +743,8 @@ function coachHTML(sl,sp){if(!SPORTS[sp])return '<p class="hint" style="margin:0
  +(m.diff?'<p class="fine">Der größte Unterschied zu '+esc(m.diff.n)+' liegt bei „'+esc(m.diff.k)+'“. Bei dir '+m.diff.me+', bei '+esc(m.diff.n)+' '+m.diff.co+' (Skala 0 bis 10).</p>':'')
  +'<p class="fine">Unsere Einordnung auf Basis öffentlicher Berichte und Interviews, keine Selbstauskunft der Trainerinnen und Trainer. Eine Annäherung, kein Urteil. Du bist keine Kopie, sondern deine eigene Handschrift.</p>'}
 function indiv(){return (S.m[1].sport||'')==='te'}
-function tm(){return indiv()?'die Person, die du trainierst':'dein Team'}
-function fitRows(sp){return ROWS.fit.map(function(r){return r.k==='c'&&sp==='te'?{k:r.k,t:'Die Person spürt die Idee jeden Tag im Training.',l:r.l,r:r.r}:r})}
+function tm(){return indiv()?'deine Spielerinnen und Spieler':'dein Team'}
+function fitRows(sp){return ROWS.fit.map(function(r){return r.k==='c'&&sp==='te'?{k:r.k,t:'Meine Spielerinnen und Spieler spüren die Idee jeden Tag im Training.',l:r.l,r:r.r}:r})}
 function secPick(){var sp=S.m[1].sport||'';
  return '<div class="chips" role="group" aria-label="Sportart" style="display:flex;flex-wrap:wrap;gap:8px;margin:0 0 6px">'+Object.keys(SPORTS).map(function(k){return '<button type="button" class="chip'+(sp===k?' on':'')+'" aria-pressed="'+(sp===k)+'" data-act="sport" data-k="'+k+'">'+SPORTS[k].n+'</button>'}).join('')+'<button type="button" class="chip'+(sp==='x'?' on':'')+'" aria-pressed="'+(sp==='x')+'" data-act="sport" data-k="x">Andere</button></div>'}
 function secSport(){var sp=S.m[1].sport||'',rows=slRows(sp);
@@ -769,7 +769,7 @@ function mk(rows){var o={};rows.forEach(function(r){o[r.k]=[5,5]});return o}
 function R(){return {mit:'',ueb:'',schw:'',anders:'',ich:'',vors:'',vdone:false,vnote:''}}
 function newPlayer(){return {id:uid(),k:'',rolle:'',st:['','',''],feld:'',schritt:'',bis:'',g:{ziel:'',fr:'',zu:'',br:''},pr:mk(ROWS.pr),ro:mk(ROWS.ro),ver:''}}
 function defaults(){return {v:1,ui:{route:'start',dm:{},day:0,preview:false},m:{
- 1:{tg:{},ei:[],ls:{fin:''},refl:R(),idea:'',pr:['','','','',''],anp:'',sl:mk1(ROWS.sl),sport:'',fit:mk1(ROWS.fit),vals:[],files:[],kn:''},
+ 1:{tg:{},ei:[],ls:{fin:''},refl:R(),idea:'',pr:['','','','',''],anp:'',sl:mk1(ROWS.sl),sport:'',fit:mk1(ROWS.fit),vals:[],files:[],kn:'',pf:''},
  2:{refl:R(),ses:[],pc:{},md:'',tp:['','','','',''],zu:{},ka:{t:'',w:''},anders:'',au:mk(ROWS.au),tc:{fo:0,fg:0,an:0,lo:0,ko:0,nk:0},tn:'',tl:[]},
  3:{refl:R(),sel:null,dl:{},dy:[],ko:mk1(ROWS.ko),lf:{ziel:'',ein:'',sag:'',hoer:'',esk:'',abs:''},en:{kraft:[],zieht:[]},ei:{kraft:'',zieht:''}},
  4:{refl:R(),pi:0,pl:[newPlayer()]}
@@ -1002,7 +1002,7 @@ function viewModule(n){var h=modHead(n)+prevVors(n);
   h+='<h2 class="band">Das Wie</h2><p class="sub">Wer bin ich als Trainerpersönlichkeit, wenn ich diese Idee lebe?</p>';
   h+='<h3 class="h" style="margin-top:0">Woher meine Spielidee kommt</h3><p class="hint">Wer und was hat sie geprägt? Lege Kreise an, benenne sie und ziehe sie näher zur Mitte, je stärker sie deine Spielidee bestimmen. Die Größe zeigt die Prägung.</p>'+sec('ei',secEi);
   h+='<h3 class="h">Meine Werte</h3><p class="hint">Wähle bis zu fünf Werte, die dich ausmachen.</p>'+sec('vals',secVals);
-  h+='<h3 class="h">Passen Spielidee und ich zusammen?</h3>'+fitRows(S.m[1].sport).map(function(r){return rng('m.1.fit.'+r.k,r.t,r.l,r.r)}).join('')+ta('m.1.kn','Wo knirscht es zwischen mir und meiner Spielidee?','',3);
+  h+='<h3 class="h">Passen Spielidee und ich zusammen?</h3>'+fitRows(S.m[1].sport).map(function(r){return rng('m.1.fit.'+r.k,r.t,r.l,r.r)}).join('')+ta('m.1.kn','Wo knirscht es zwischen mir und meiner Spielidee?','',3)+(indiv()?ta('m.1.pf','Für wen passt meine Spielidee gut, für wen weniger?','Zum Beispiel wegen Größe, Aufschlag, Athletik oder Spielverständnis',3):'');
  }
  if(n===2){
   h+='<h2 class="band">Meine Trainingsprinzipien</h2><p class="sub">Woran erkennt man, wie ich trainiere? Die Grundsätze, nach denen ich meine Einheiten baue.</p>'+tpHTML()+sec('zu',secZu);
@@ -1116,7 +1116,7 @@ async function pBuild(c,n){var m=MODS[n-1],M=S.m[n];
   pTracks(c,ROWS.pr,p.pr,['Heute','In zwölf Monaten']);pQ(c,'Wichtigstes Entwicklungsfeld',p.feld);pQ(c,'Nächster Schritt'+(p.bis?' bis '+p.bis:''),p.schritt);pQ(c,'Gesprächsziel',p.g.ziel);pQ(c,'Meine Einstiegsfragen',p.g.fr);pQ(c,'Das traue ich der Person zu',p.g.zu);pQ(c,'Das brauche ich von der Person',p.g.br)})}
  pH2(c,['Das Wie','Mein Auftritt im Training','Führen','Meine Rolle'][n-1]);
  if(n===1){pEi(c);if(M.vals.length){pH3(c,'Meine Werte');M.vals.forEach(function(v,i){pP(c,(i+1)+'. '+v)})}
-  pH3(c,'Passen Spielidee und ich zusammen?');pTracks1(c,fitRows(M.sport),M.fit);pQ(c,'Wo es knirscht',M.kn)}
+  pH3(c,'Passen Spielidee und ich zusammen?');pTracks1(c,fitRows(M.sport),M.fit);pQ(c,'Wo es knirscht',M.kn);if(M.sport==='te')pQ(c,'Für wen die Spielidee passt',M.pf)}
  if(n===2){pQ(c,'Meine Kernaufgabe im Training',(M.ka||{}).t);pQ(c,'Meine Kernaufgabe im Wettkampf',(M.ka||{}).w);pH3(c,'Mein Auftritt im Training');pTracks(c,ROWS.au,M.au,['Heute','Mein Ziel']);
   M.tl.forEach(function(e){pH3(c,'Trainingsbeobachtung vom '+e.date);pP(c,(e.fr!==undefined?'Fragen '+e.fr:'Offene Fragen '+(e.fo||0)+', geschlossene Fragen '+(e.fg||0))+', Anweisungen '+e.an+', Lob '+e.lo+', Korrekturen '+e.ko+(e.nk!==undefined?', negative Kritik '+e.nk:'')+(e.note?'\n'+e.note:''))})}
  if(n===3){pH3(c,'Mein Führungskompass');pTracks1(c,ROWS.ko,M.ko);
