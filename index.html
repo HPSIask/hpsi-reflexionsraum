@@ -126,6 +126,18 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
 .tb.empty{flex:1;background:var(--soft);color:var(--mut);font-weight:400}
 .tb span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #tlcurve{width:100%;height:auto;display:block}
+.wkd{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin:0 0 16px}
+.wkd button{border:1px solid var(--fg);background:var(--bg);color:var(--fg);padding:8px 2px;cursor:pointer;font:inherit;font-size:18px;font-weight:500;text-align:center;line-height:1.2;min-height:48px}
+.wkd button.on{background:var(--inv);color:var(--oninv)}
+.wkd button small{display:block;font-size:13px;font-weight:400;opacity:.8}
+.fg{grid-column:1/-1;display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;align-items:end}
+.fg .f{margin:0}
+.fgm{grid-column:1/-1;font-size:17px;color:var(--mut);min-height:1.2em}
+.wkc{width:100%;height:auto;display:block;margin:0 0 6px}
+.wkt{width:100%;border-collapse:collapse;font-size:16px;min-width:480px}
+.wkt th,.wkt td{padding:6px 4px;text-align:center;border-top:1px solid var(--soft2);font-weight:400}
+.wkt th:first-child{text-align:left;font-weight:500;padding-right:8px}
+.wkt thead th{font-weight:500;border-top:0}
 .cnt{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--soft2)}
 .cnt .n{width:48px;text-align:center;font-weight:300;font-style:normal;font-variation-settings:"slnt" 12;font-size:34px;line-height:1}
 .cnt .l{flex:1;font-weight:500}
@@ -662,6 +674,16 @@ var ROWS={
  pr:[{k:'fach',t:'Fachlich',l:'am Anfang',r:'stark'},{k:'ath',t:'Athletisch',l:'am Anfang',r:'stark'},{k:'men',t:'Mental',l:'am Anfang',r:'stark'},{k:'soz',t:'Sozial',l:'am Anfang',r:'stark'},{k:'sel',t:'Selbststeuerung',l:'am Anfang',r:'stark'}],
  ro:[{k:'ford',t:'Fordern',l:'wenig',r:'viel'},{k:'foer',t:'Fördern',l:'wenig',r:'viel'},{k:'fuehr',t:'Führen',l:'wenig',r:'viel'}]
 };
+var ROWS2={
+ pass:[{k:'pass',t:'Wie sehr passt meine Trainingsgestaltung zu meiner Spielidee?',l:'passt kaum',r:'passt sehr gut'}],
+ sci:[{k:'ges',t:'Gesundheit',l:'kaum im Blick',r:'fester Teil meiner Planung'},
+  {k:'erh',t:'Energie und Erholung',l:'kaum im Blick',r:'fester Teil meiner Planung'},
+  {k:'vol',t:'Umfang der Belastung',l:'nach Gefühl',r:'bewusst gesteuert'},
+  {k:'int',t:'Intensität der Belastung',l:'nach Gefühl',r:'bewusst gesteuert'},
+  {k:'ver',t:'Verteilung der Intensitäten über die Woche',l:'nach Gefühl',r:'bewusst gesteuert'},
+  {k:'pla',t:'Wochen und Saisonplanung',l:'von Woche zu Woche',r:'langfristig geplant'},
+  {k:'wet',t:'Vorbereitung auf den Wettkampf',l:'ich mache es wie immer',r:'gezielt aufgebaut'}]
+};
 
 var SPORTS={
  fb:{n:'Fußball',rows:null,c:[
@@ -770,7 +792,7 @@ function R(){return {mit:'',ueb:'',schw:'',anders:'',ich:'',vors:'',vdone:false,
 function newPlayer(){return {id:uid(),k:'',rolle:'',st:['','',''],feld:'',schritt:'',bis:'',g:{ziel:'',fr:'',zu:'',br:''},pr:mk(ROWS.pr),ro:mk(ROWS.ro),ver:''}}
 function defaults(){return {v:1,ui:{route:'start',dm:{},day:0,preview:false},m:{
  1:{tg:{},ei:[],ls:{fin:''},refl:R(),idea:'',pr:['','','','',''],anp:'',sl:mk1(ROWS.sl),sport:'',fit:mk1(ROWS.fit),vals:[],files:[],kn:'',pf:''},
- 2:{refl:R(),ses:[],pc:{},md:'',tp:['','','','',''],zu:{},ka:{t:'',w:''},anders:'',au:mk(ROWS.au),tc:{fo:0,fg:0,an:0,lo:0,ko:0,nk:0},tn:'',tl:[]},
+ 2:{refl:R(),ses:[],pc:{},md:'',wk:{'mo':[],'di':[],'mi':[],'do':[],'fr':[],'sa':[],'so':[]},tg:{},ov:{i:5,c:5,on:false},pass:mk1(ROWS2.pass),sci:mk1(ROWS2.sci),scin:'',film:false,tp:['','','','',''],zu:{},ka:{t:'',w:''},anders:'',au:mk(ROWS.au),tc:{fo:0,fg:0,an:0,lo:0,ko:0,nk:0},tn:'',tl:[]},
  3:{refl:R(),sel:null,dl:{},dy:[],ko:mk1(ROWS.ko),lf:{ziel:'',ein:'',sag:'',hoer:'',esk:'',abs:''},en:{kraft:[],zieht:[]},ei:{kraft:'',zieht:''}},
  4:{refl:R(),pi:0,pl:[newPlayer()]}
 }}}
@@ -778,7 +800,8 @@ function isObj(o){return o&&typeof o==='object'&&!Array.isArray(o)}
 function merge(d,s){if(!isObj(d)||!isObj(s))return s;var o={};Object.keys(d).forEach(function(k){o[k]=d[k]});Object.keys(s).forEach(function(k){if(k==='__proto__'||k==='constructor'||k==='prototype')return;o[k]=(isObj(d[k])&&isObj(s[k]))?merge(d[k],s[k]):s[k]});return o}
 function norm(){var M=S.m;[M[1].sl,M[1].fit,M[3].ko].forEach(function(o){Object.keys(o).forEach(function(k){if(Array.isArray(o[k]))o[k]=o[k][1]})});
  if(isObj(M[1].idea))M[1].idea=M[1].idea.nach||M[1].idea.vor||'';
- if(isObj(M[2].ses)&&!Array.isArray(M[2].ses)){var q=M[2].ses,useN=q.nach&&q.nach.length,pc=M[2].pc;M[2].ses=useN?q.nach:(q.vor||[]);if(isObj(pc)&&(pc.vor||pc.nach))M[2].pc=useN?(pc.nach||{}):(pc.vor||{})}}
+ if(isObj(M[2].ses)&&!Array.isArray(M[2].ses)){var q=M[2].ses,useN=q.nach&&q.nach.length,pc=M[2].pc;M[2].ses=useN?q.nach:(q.vor||[]);if(isObj(pc)&&(pc.vor||pc.nach))M[2].pc=useN?(pc.nach||{}):(pc.vor||{})}
+ if(Array.isArray(M[2].ses)&&M[2].ses.length){var wk0=M[2].wk;if(!Object.keys(wk0).some(function(k){return wk0[k].length})){var mp={'Wettkampftag minus 5':'mo','Wettkampftag minus 4':'di','Wettkampftag minus 3':'mi','Wettkampftag minus 2':'do','Wettkampftag minus 1':'fr','Wettkampftag':'sa','Wettkampftag plus 1':'so'};wk0[mp[M[2].md]||'mi']=[{id:uid(),nm:'',b:M[2].ses.map(function(b){b.cog=b.cog||3;b.p=b.p||0;b.l=b.l||0;b.w=b.w||0;b.pl=b.pl||'Ganzer Platz';return b})}]}M[2].ses=[]}}
 var S=defaults();
 var storageOK=true;
 try{var raw=localStorage.getItem(KEY);if(raw){S=merge(defaults(),JSON.parse(raw));norm()}}catch(e){storageOK=false}
@@ -846,7 +869,7 @@ function radarSVG(vals){var rows=ROWS.ko,cx=180,cy=150,Rr=88,ang=function(i){ret
 function drawRadar(){var el=$('#radar');if(el)el.innerHTML=radarSVG(S.m[3].ko)}
 
 /* ---------- Trainingseinheit ---------- */
-function drawTimeline(){var bar=$('#tlbar');if(!bar)return;var L=S.m[2].ses,tot=L.reduce(function(s,b){return s+Math.max(0,b.min||0)},0);
+function drawTimeline(){var bar=$('#tlbar');if(!bar)return;var L=curBlocks(),tot=L.reduce(function(s,b){return s+Math.max(0,b.min||0)},0);
  $('#tltot').textContent=tot?tot+' Minuten':'Noch keine Bausteine';
  bar.innerHTML=tot?L.map(function(b){return '<div class="tb" style="flex:'+Math.max(b.min||0,0.5)+'" title="'+esc(b.t)+', '+b.min+' Min"><span>'+esc(b.t)+'</span></div>'}).join(''):'<div class="tb empty">Füge unten Bausteine hinzu</div>';
  var W=640,H=130,pad=10,x=0,d='M0,'+H;
@@ -865,11 +888,70 @@ function secZu(){var sp=S.m[1].pr.map(function(p,i){return {t:String(p).trim(),i
  sp.forEach(function(x){var v=S.m[2].zu[x.i],has=v!==undefined&&v!==''&&tp.some(function(y){return String(y.i)===String(v)});if(has)ok++;
   h+='<label class="f"><span class="fl">'+esc(x.t)+'</span><select data-b="m.2.zu.'+x.i+'"><option value="">Noch nichts zugeordnet</option>'+tp.map(function(y){return '<option value="'+y.i+'"'+(String(v)===String(y.i)?' selected':'')+'>'+esc(y.t)+'</option>'}).join('')+'</select></label>'});
  return h+'<p class="gap">'+ok+' von '+sp.length+' Spielprinzipien werden durch ein Trainingsprinzip gestützt.</p>'}
-function secSess(){var L=S.m[2].ses,h=mdSel()+'<div id="tlbar" aria-label="Zeitleiste"></div><div class="row" style="justify-content:space-between"><b id="tltot"></b></div><div id="tlcurve"></div>';
- h+='<div style="margin-top:16px">'+L.map(function(b,i){var q='m.2.ses.'+i;
-  return '<div class="blk"><div><label>Baustein</label><select data-b="'+q+'.t">'+BTYPES.map(function(t){return '<option'+(t===b.t?' selected':'')+'>'+t+'</option>'}).join('')+'</select></div><div class="nm"><label>Was passiert hier?</label><input type="text" data-b="'+q+'.n" value="'+esc(b.n)+'" placeholder="Kurz beschreiben"></div><div><label>Minuten</label><input type="number" min="1" max="180" data-t="num" data-b="'+q+'.min" value="'+b.min+'"></div><div><label>Intensität</label><select data-t="num" data-b="'+q+'.int">'+[1,2,3,4,5].map(function(n){return '<option value="'+n+'"'+(n===b.int?' selected':'')+'>'+n+(n===1?' ruhig':(n===5?' maximal':''))+'</option>'}).join('')+'</select></div><div class="mv"><button class="btn sm ghost" data-act="mv" data-path="m.2.ses" data-i="'+i+'" data-dir="-1" aria-label="nach oben">Hoch</button><button class="btn sm ghost" data-act="mv" data-path="m.2.ses" data-i="'+i+'" data-dir="1" aria-label="nach unten">Runter</button><button class="btn sm ghost" data-act="rm" data-path="m.2.ses" data-i="'+i+'">Entfernen</button></div></div>'}).join('')+'</div>';
- h+='<p class="hint" style="margin-top:14px">Baustein hinzufügen</p><div class="chips">'+BTYPES.map(function(t){return '<button class="chip" data-act="addblock" data-t="'+t+'">'+t+'</button>'}).join('')+'</div>';
-  return h}
+var WD=[['mo','Montag','Mo',-5],['di','Dienstag','Di',-4],['mi','Mittwoch','Mi',-3],['do','Donnerstag','Do',-2],['fr','Freitag','Fr',-1],['sa','Samstag','Sa',0],['so','Sonntag','So',1]];
+var wkSel='mi',wkEin=0;
+var BDEF={'Ankommen':[10,1,1],'Aktivierung':[15,2,2],'Spielform':[20,4,4],'Übungsform':[15,3,2],'Wettkampf':[90,5,4],'Video':[15,1,3],'Pause':[5,1,1],'Reflexion':[10,1,3]};
+function mdLab(n){return n===0?'Wettkampftag':'Wettkampftag '+(n<0?'minus ':'plus ')+Math.abs(n)}
+function fmt1(x){return String(Math.round(x*10)/10).replace('.',',')}
+function newEin(){return {id:uid(),nm:'',b:[]}}
+function newBlock(t){var d=BDEF[t]||[15,3,3];return {id:uid(),t:t,n:'',min:d[0],int:d[1],cog:d[2],p:0,l:0,w:0,pl:'Ganzer Platz'}}
+function wkStat(u,ex){var z=0,l=0,cs=0;(u||[]).forEach(function(e){(e.b||[]).forEach(function(b){if(b.t==='Pause'||(ex&&b.t==='Wettkampf'))return;var m=Math.max(0,Number(b.min)||0);z+=m;l+=m*(b.int||3);cs+=m*(b.cog||3)})});return {z:z,l:l,cs:cs,i:z?l/z:0,c:z?cs/z:0,n:(u||[]).length}}
+function curEin(){var u=S.m[2].wk[wkSel]||[];return u[wkEin]||null}
+function curBlocks(){var e=curEin();return e?e.b:[]}
+function fgText(b,sp){if(sp==='te')return '';var p=Number(b.p)||0,l=Number(b.l)||0,w=Number(b.w)||0;if(p>0&&l>0&&w>0)return 'Fläche '+Math.round(l*w)+' m², das sind '+fmt1(l*w/p)+' m² pro Person';return ''}
+function fgRef(sp){if(sp==='fb')return 'Zum Vergleich im Spiel: Bei 105 mal 68 Metern und 22 Personen sind es rund 325 m² pro Person.';if(sp==='hb')return 'Zum Vergleich im Spiel: Bei 40 mal 20 Metern und 14 Personen auf dem Feld sind es rund 57 m² pro Person.';return ''}
+function fgPdf(b,sp){var p=Number(b.p)||0;if(!(b.t==='Spielform'||b.t==='Übungsform'||b.t==='Wettkampf')||!p)return '';if(sp==='te')return ', '+p+' Personen, '+(b.pl||'');var t=fgText(b,sp);return ', '+p+' Personen'+(t?', '+t:'')}
+function blockHTML(q,b,sp){var f='',fe=(b.t==='Spielform'||b.t==='Übungsform'||b.t==='Wettkampf');
+ if(fe){if(sp==='te')f='<div><label>Personen auf dem Platz</label><input type="number" min="0" max="40" data-t="num" data-b="'+q+'.p" value="'+(b.p||'')+'"></div><div><label>Platzbereich</label><select data-b="'+q+'.pl">'+['Ganzer Platz','Halber Platz','Aufschlagfeld','Anderer Bereich'].map(function(o){return '<option'+(o===b.pl?' selected':'')+'>'+o+'</option>'}).join('')+'</select></div>';
+  else f='<div><label>Personen im Feld</label><input type="number" min="0" max="60" data-t="num" data-b="'+q+'.p" value="'+(b.p||'')+'"></div><div><label>Länge in Metern</label><input type="number" min="0" max="120" data-t="num" data-b="'+q+'.l" value="'+(b.l||'')+'"></div><div><label>Breite in Metern</label><input type="number" min="0" max="100" data-t="num" data-b="'+q+'.w" value="'+(b.w||'')+'"></div>'}
+ return '<div class="blk" data-q="'+q+'"><div><label>Baustein</label><select data-b="'+q+'.t">'+BTYPES.map(function(t){return '<option'+(t===b.t?' selected':'')+'>'+t+'</option>'}).join('')+'</select></div><div class="nm"><label>Was passiert hier?</label><input type="text" data-b="'+q+'.n" value="'+esc(b.n)+'" placeholder="Kurz beschreiben"></div><div><label>Minuten</label><input type="number" min="1" max="180" data-t="num" data-b="'+q+'.min" value="'+b.min+'"></div><div><label>Intensität</label><select data-t="num" data-b="'+q+'.int">'+[1,2,3,4,5].map(function(n){return '<option value="'+n+'"'+(n===b.int?' selected':'')+'>'+n+(n===1?' ruhig':(n===5?' maximal':''))+'</option>'}).join('')+'</select></div><div class="mv"><button class="btn sm ghost" data-act="mv" data-path="'+q.replace(/\.\d+$/,'')+'" data-i="'+q.split('.').pop()+'" data-dir="-1" aria-label="nach oben">Hoch</button><button class="btn sm ghost" data-act="mv" data-path="'+q.replace(/\.\d+$/,'')+'" data-i="'+q.split('.').pop()+'" data-dir="1" aria-label="nach unten">Runter</button><button class="btn sm ghost" data-act="rm" data-path="'+q.replace(/\.\d+$/,'')+'" data-i="'+q.split('.').pop()+'">Entfernen</button></div>'
+  +'<div class="fg"><div><label>Kognitive Intensität</label><select data-t="num" data-b="'+q+'.cog">'+[1,2,3,4,5].map(function(n){return '<option value="'+n+'"'+(n===(b.cog||3)?' selected':'')+'>'+n+(n===1?' kaum Entscheidungen':(n===5?' ständig und unter Druck':''))+'</option>'}).join('')+'</select></div>'+f+'<div class="fgm">'+(fe?fgText(b,sp):'')+'</div></div></div>'}
+function m1touched(){var sl=S.m[1].sl;return Object.keys(sl).some(function(k){return Number(sl[k])!==5})}
+function m1Empty(){var m=S.m[1],tg=m.tg||{};return !String(m.idea).trim()&&!m.pr.some(function(x){return String(x).trim()})&&!m1touched()&&!Object.keys(tg).some(function(k){return String(tg[k].n).trim()||tg[k].k})}
+function ideaVals(){var sl=S.m[1].sl,sp=S.m[1].sport||'',o=S.m[2].ov;
+ if(m1touched()){var K=sp==='te'?['aufbau','druck','ballgewinn']:['druck','ballgewinn','ballverlust'],avg=function(a){return a.reduce(function(s,k){return s+(Number(sl[k])||0)},0)/a.length};return {i:avg(K),c:avg(['frei','freiGegen'])}}
+ if(o.on)return {i:Number(o.i),c:Number(o.c)};return null}
+function wkAll(){var wk=S.m[2].wk,z=0,l=0,c=0;WD.forEach(function(d){var s=wkStat(wk[d[0]],true);z+=s.z;l+=s.l;c+=s.cs});return {z:z,i:z?l/z:0,c:z?c/z:0}}
+function wkCheck(){var A=wkAll(),V=ideaVals(),t=[];
+ if(!A.z)return ['Sobald du Einheiten einträgst, vergleiche ich deine Woche mit deiner Spielidee.'];
+ if(!V)return ['Für den Vergleich brauche ich deine Spielidee. Bewege in Modul 1 die Regler, lade dein Modul-1-PDF hoch oder stelle unten kurz zwei Regler ein.'];
+ var ti=(A.i-1)/4*10,tc=(A.c-1)/4*10,di=V.i-ti,dc=V.c-tc;
+ if(Math.abs(di)<2)t.push('Intensität: Deine Spielidee verlangt '+fmt1(V.i)+' von 10, deine Woche liegt bei '+fmt1(ti)+'. Das passt gut zusammen.');
+ else if(di>0)t.push('Intensität: Deine Spielidee verlangt viel Intensität ('+fmt1(V.i)+' von 10), deine Woche liegt bei '+fmt1(ti)+'. Wo trainierst du die Intensität, die du im Wettkampf brauchst?');
+ else t.push('Intensität: Deine Woche liegt mit '+fmt1(ti)+' über dem, was deine Spielidee verlangt ('+fmt1(V.i)+' von 10). Ist das Absicht, zum Beispiel als Reserve?');
+ if(Math.abs(dc)<2)t.push('Entscheidungen: Deine Spielidee gibt '+fmt1(V.c)+' von 10 an Freiheit, die kognitive Intensität deiner Woche liegt bei '+fmt1(tc)+'. Das passt gut zusammen.');
+ else if(dc>0)t.push('Entscheidungen: Deine Spielidee gibt viel Freiheit bei Entscheidungen ('+fmt1(V.c)+' von 10), die kognitive Intensität deiner Woche liegt bei '+fmt1(tc)+'. Üben deine Spielerinnen und Spieler die Entscheidungen, die du im Spiel von ihnen willst?');
+ else t.push('Entscheidungen: Deine Woche fordert mit '+fmt1(tc)+' mehr Entscheidungen, als deine Spielidee an Freiheit vorsieht ('+fmt1(V.c)+' von 10). Ist das gewollt?');
+ return t}
+function secWeek(){var sp=S.m[1].sport||'',wk=S.m[2].wk,h='';
+ h+='<p class="hint">Plane eine Musterwoche mit Wettkampf am Samstag. Wähle einen Tag, lege bis zu zwei Einheiten an und baue sie aus Bausteinen. Unten siehst du deine Woche im Überblick.</p>';
+ h+='<div class="wkd" role="group" aria-label="Wochentag">'+WD.map(function(d){var s=wkStat(wk[d[0]]);return '<button type="button" class="'+(wkSel===d[0]?'on':'')+'" aria-pressed="'+(wkSel===d[0])+'" data-act="wkday" data-d="'+d[0]+'">'+d[2]+'<small>'+(s.z?s.z+' Min':(d[3]===0?'Spiel':'frei'))+'</small></button>'}).join('')+'</div>';
+ var dd=WD.filter(function(x){return x[0]===wkSel})[0],u=wk[wkSel];if(wkEin>=u.length)wkEin=Math.max(0,u.length-1);
+ h+='<h3 class="h" style="margin-top:0">'+dd[1]+', '+mdLab(dd[3])+'</h3>';
+ if(!u.length){h+='<p class="hint">An diesem Tag steht noch keine Einheit.</p><button class="btn" data-act="wkaddein">Einheit anlegen</button>'}
+ else{
+  h+='<div class="chips" style="margin-bottom:12px">'+u.map(function(e,i){return '<button class="chip'+(i===wkEin?' on':'')+'" aria-pressed="'+(i===wkEin)+'" data-act="wkein" data-i="'+i+'">Einheit '+(i+1)+(String(e.nm).trim()?': '+esc(String(e.nm).trim().slice(0,24)):'')+'</button>'}).join('')+(u.length<2?'<button class="chip" data-act="wkaddein">+ Zweite Einheit</button>':'')+'</div>';
+  var qe='m.2.wk.'+wkSel+'.'+wkEin;
+  h+=tx(qe+'.nm','Name der Einheit','Zum Beispiel: Aktivierung und Spielform');
+  h+='<div id="tlbar" aria-label="Zeitleiste"></div><div class="row" style="justify-content:space-between"><b id="tltot"></b></div><div id="tlcurve"></div>';
+  h+='<p class="hint" style="margin-top:12px">Kognitive Intensität: Wie viele und wie schwierige Entscheidungen müssen deine Spielerinnen und Spieler treffen? 1 heißt kaum, 5 heißt ständig und unter Druck.'+(fgRef(sp)?' '+fgRef(sp):'')+'</p>';
+  h+='<div style="margin-top:8px">'+u[wkEin].b.map(function(b,i){return blockHTML(qe+'.b.'+i,b,sp)}).join('')+'</div>';
+  h+='<p class="hint" style="margin-top:14px">Baustein hinzufügen</p><div class="chips">'+BTYPES.map(function(t){return '<button class="chip" data-act="addblock" data-t="'+t+'">'+t+'</button>'}).join('')+'</div>';
+  h+='<div class="row" style="margin-top:18px;align-items:flex-end;gap:12px"><label class="f" style="margin:0"><span class="fl">Diesen Tag kopieren auf</span><select id="wkcp">'+WD.filter(function(x){return x[0]!==wkSel}).map(function(x){return '<option value="'+x[0]+'">'+x[1]+'</option>'}).join('')+'</select></label><button class="btn ghost" data-act="wkcopy">Kopieren</button><button class="btn sm ghost" data-act="rm" data-path="m.2.wk.'+wkSel+'" data-i="'+wkEin+'">Diese Einheit entfernen</button></div>'}
+ h+='<h3 class="h">Meine Woche im Überblick</h3><div id="wkchart"></div>';
+ h+='<h3 class="h">Passt meine Woche zu meiner Spielidee?</h3><div id="wkcheck"></div>';
+ if(!m1touched()){h+='<div class="card" style="margin-top:14px"><p class="hint" style="margin-top:0">'+(m1Empty()?'Dein Modul 1 ist auf diesem Gerät leer. Lade oben dein PDF aus Modul 1 hoch oder stelle kurz zwei Regler ein.':'Du hast die Regler zur Spielidee in Modul 1 noch nicht bewegt. Bewege sie dort oder stelle kurz zwei Regler ein.')+'</p>'+rng('m.2.ov.i','Wie viel Intensität verlangt meine Spielidee?','wenig','viel')+rng('m.2.ov.c','Wie viel Freiheit bei Entscheidungen gibt meine Spielidee?','wenig','viel')+'</div>'}
+ return h}
+function drawWeek(){var el=$('#wkchart');if(!el)return;var wk=S.m[2].wk,st=WD.map(function(d){return wkStat(wk[d[0]])}),mx=Math.max.apply(null,st.map(function(s){return s.l}).concat([1])),W=640,H=150,bw=W/7,tz=st.reduce(function(s,x){return s+x.z},0);
+ if(!tz){el.innerHTML='<p class="hint">Sobald du Einheiten einträgst, siehst du hier deine Woche.</p>'}
+ else{var svg='<svg class="wkc" viewBox="0 0 '+W+' '+(H+44)+'" role="img" aria-label="Belastung pro Tag der Musterwoche"><line x1="0" x2="'+W+'" y1="'+(H+14)+'" y2="'+(H+14)+'" style="stroke:var(--mut)" stroke-width="1"/>';
+  st.forEach(function(s,i){var hh=s.l/mx*H,cx=i*bw+bw/2;if(hh>0)svg+='<rect x="'+(cx-bw*.3).toFixed(1)+'" y="'+(H+14-hh).toFixed(1)+'" width="'+(bw*.6).toFixed(1)+'" height="'+hh.toFixed(1)+'" style="fill:var(--inv)"/>';
+   svg+='<text x="'+cx.toFixed(1)+'" y="'+(H+10-hh).toFixed(1)+'" text-anchor="middle" font-size="17" style="fill:var(--fg);font-family:inherit">'+Math.round(s.l)+'</text><text x="'+cx.toFixed(1)+'" y="'+(H+36)+'" text-anchor="middle" font-size="18" style="fill:var(--fg);font-family:inherit;font-weight:500">'+WD[i][2]+'</text>'});
+  svg+='</svg>';
+  var row=function(lab,fn){return '<tr><th scope="row">'+lab+'</th>'+st.map(function(s){return '<td>'+fn(s)+'</td>'}).join('')+'</tr>'};
+  el.innerHTML='<p class="hint" style="margin:0 0 6px">Belastung pro Tag, also Minuten mal Intensität, ohne Pausen.</p>'+svg+'<div style="overflow-x:auto"><table class="wkt"><thead><tr><th></th>'+WD.map(function(d){return '<th scope="col">'+d[2]+'</th>'}).join('')+'</tr></thead><tbody>'
+   +row('Einheiten',function(s){return s.n||'-'})+row('Trainingszeit in Minuten',function(s){return s.z||'-'})+row('Intensität, Durchschnitt von 5',function(s){return s.z?fmt1(s.i):'-'})+row('Kognitive Intensität, Durchschnitt von 5',function(s){return s.z?fmt1(s.c):'-'})+'</tbody></table></div><p class="hint" style="margin:6px 0 0">Woche gesamt: '+Math.floor(tz/60)+' Std. '+(tz%60)+' Min. Die Durchschnitte sind nach Dauer gewichtet.</p>'}
+ var ck=$('#wkcheck');if(ck)ck.innerHTML=wkCheck().map(function(t){return '<p class="gap" style="margin-bottom:8px">'+esc(t)+'</p>'}).join('')+'<p class="hint" style="margin:6px 0 0">Ein Hinweis, kein Urteil. Der Wettkampf selbst zählt im Vergleich nicht mit. Die Intensität deiner Spielidee leite ich aus den Reglern zu Pressing, Umschalten und Gegendruck ab (beim Tennis aus Ballwechsel, Return und Aufschlag), die Freiheit aus den Reglern zu den Entscheidungen.</p>'}
 function secTally(){var t=S.m[2].tc,rows=[['fo','Offene Fragen'],['fg','Geschlossene oder suggestive Fragen'],['an','Anweisungen gegeben'],['lo','Lob und Anerkennung'],['ko','Korrekturen'],['nk','Negative Kritik']];
  var h='<p class="hint">Offene Fragen lassen jede Antwort zu. Bei geschlossenen oder suggestiven Fragen gibt es eine erwartete Antwort. Eine Korrektur ist ein sachlicher Hinweis, negative Kritik bewertet.</p>'+rows.map(function(r){return '<div class="cnt"><span class="l">'+r[1]+'</span><button class="btn ghost" data-act="tally" data-k="'+r[0]+'" data-d="-1" aria-label="'+r[1]+' weniger">-</button><span class="n">'+(t[r[0]]||0)+'</span><button class="btn" data-act="tally" data-k="'+r[0]+'" data-d="1" aria-label="'+r[1]+' mehr">+</button></div>'}).join('');
  var fq=(t.fo||0)+(t.fg||0);if(fq)h+='<p class="gap">Von '+fq+' Fragen waren '+(t.fo||0)+' offen, das sind '+Math.round((t.fo||0)/fq*100)+' Prozent.</p>';
@@ -894,23 +976,39 @@ var AG=[
   {id:'di1400',t:'14:00',x:'Spielidentitätsprozess im Fußball',w:'Tilman Huber'},
   {id:'di1630',t:'16:30',x:'Abschluss und Ausblick',w:'Lukas Rösel'}]}
 ];
+var AG2=[
+ {s:'Montag 23.11.',d:'Montag, 23. November 2026',r:[
+  {t:'09:00',x:'Eintreffen der Teilnehmenden'},
+  {id:'m2mo0930',t:'09:30',x:'Vermittlung einer Spielidee und Trainingsvision',w:'Hannes Ehrhard',y:'Wie bringe ich meine Spielidee so rüber, dass sie ankommt?'},
+  {t:'12:00 bis 14:00',x:'Mittagspause'},
+  {id:'m2mo1400',t:'14:00',x:'Spielidentität und Trainingskonzeption bei den Hamburg Towers',w:'Fabian Villmeter und Benka Barloschky',y:'Wie wird aus einer Spielidentität ein Trainingskonzept? Und was davon passt in meinen Alltag?'}]},
+ {s:'Dienstag 24.11.',d:'Dienstag, 24. November 2026',r:[
+  {id:'m2di0930',t:'09:30',x:'Metaanalyse: Trainingsform und Coachingverhalten',w:'Lukas Rösel',y:'Wann nutze ich welche Methodik und was ist das geringste Maß an Anleitung und Feedback, das nötig ist?'},
+  {id:'m2di1100',t:'11:00',x:'Periodisierung und Wettkampfvorbereitung im Rudern',w:'Eric Johannesen',y:'Wie baue ich Belastung über Woche und Saison auf? Umfang, Intensität, Verteilung und Vorbereitung auf den Wettkampf.'},
+  {t:'13:30 bis 14:30',x:'Mittagspause'},
+  {id:'m2di1500',t:'15:00',x:'Reflexion und Anwendbarkeit',w:'Lukas Rösel'},
+  {id:'m2di1600',t:'16:00',x:'Coachingrollen und Coachingverhalten',w:'Lukas Rösel'}]}
+];
+var AGS={1:AG,2:AG2};
 var tgOpen={};
-var dayOpen=null;
-function dayEntries(A){var tg=S.m[1].tg,c=0;A.r.forEach(function(r){if(r.id&&tg[r.id]&&(String(tg[r.id].n).trim()||tg[r.id].k))c++});return c}
-function secTage(){var tg=S.m[1].tg,h='';
- if(!dayOpen){dayOpen={};var td=new Date(),k=td.getFullYear()+'-'+(td.getMonth()+1)+'-'+td.getDate();if(k==='2026-10-19')dayOpen[0]=true;if(k==='2026-10-20')dayOpen[1]=true}
+var dayOpenN={};
+function openMap(n){if(!dayOpenN[n]){dayOpenN[n]={};var td=new Date(),k=td.getFullYear()+'-'+(td.getMonth()+1)+'-'+td.getDate();if(n===1){if(k==='2026-10-19')dayOpenN[n][0]=true;if(k==='2026-10-20')dayOpenN[n][1]=true}if(n===2){if(k==='2026-11-23')dayOpenN[n][0]=true;if(k==='2026-11-24')dayOpenN[n][1]=true}}return dayOpenN[n]}
+function dayEntries(A,n){var tg=S.m[n||1].tg,c=0;A.r.forEach(function(r){if(r.id&&tg[r.id]&&(String(tg[r.id].n).trim()||tg[r.id].k))c++});return c}
+function secTageN(n){var tg=S.m[n].tg,h='',om=openMap(n),sn=n===1?'tage':'tage2';
  h+='<p class="hint">HPSI, Donnerstraße 20. Tippe einen Tag an und dann einen Programmpunkt, um deine Gedanken festzuhalten. Am besten gleich im Programmpunkt selbst.</p>';
- AG.forEach(function(A,di){var op=!!dayOpen[di],n=dayEntries(A);
-  h+='<div class="agc dayc"><button type="button" class="agi" aria-expanded="'+op+'" data-act="daytoggle" data-i="'+di+'"><b class="agt" style="font-size:1.2em">'+A.s+'</b><span style="flex:1;min-width:0"><span class="mut" style="display:block">'+(n?n+(n===1?' Eintrag':' Einträge'):A.r.filter(function(r){return r.id}).length+' Programmpunkte')+'</span></span></button>';
+ AGS[n].forEach(function(A,di){var op=!!om[di],cnt=dayEntries(A,n);
+  h+='<div class="agc dayc"><button type="button" class="agi" aria-expanded="'+op+'" data-act="daytoggle" data-n="'+n+'" data-i="'+di+'"><b class="agt" style="font-size:1.2em">'+A.s+'</b><span style="flex:1;min-width:0"><span class="mut" style="display:block">'+(cnt?cnt+(cnt===1?' Eintrag':' Einträge'):A.r.filter(function(r){return r.id}).length+' Programmpunkte')+'</span></span></button>';
   if(op){h+='<div class="agb">';
    A.r.forEach(function(r){if(!r.id){h+='<div class="agrow"><b>'+r.t+'</b><span>'+r.x+'</span></div>';return}
-    if(!tg[r.id])tg[r.id]={n:'',k:false,w:''};var q='m.1.tg.'+r.id,e=tg[r.id],open=!!tgOpen[r.id],has=!!(String(e.n).trim()||e.k);
-    h+='<div class="agc" style="background:var(--bg)"><button type="button" class="agi" aria-expanded="'+open+'" data-act="agtoggle" data-id="'+r.id+'"><b class="agt">'+r.t+'</b><span style="flex:1;min-width:0"><span class="agx" style="display:block">'+r.x+'</span><span class="mut" style="display:block">'+r.w+'</span></span>'+(has?'<i class="agdot" title="Eintrag vorhanden"></i>':'')+'</button>';
+    if(!tg[r.id])tg[r.id]={n:'',k:false,w:''};var q='m.'+n+'.tg.'+r.id,e=tg[r.id],open=!!tgOpen[r.id],has=!!(String(e.n).trim()||e.k);
+    h+='<div class="agc" style="background:var(--bg)"><button type="button" class="agi" aria-expanded="'+open+'" data-act="agtoggle" data-n="'+n+'" data-id="'+r.id+'"><b class="agt">'+r.t+'</b><span style="flex:1;min-width:0"><span class="agx" style="display:block">'+r.x+'</span><span class="mut" style="display:block">'+r.w+'</span></span>'+(has?'<i class="agdot" title="Eintrag vorhanden"></i>':'')+'</button>';
     if(open){h+='<div class="agb">'+(r.y?'<p class="hint">'+r.y+'</p>':'')+ta(q+'.n','Was ist hängen geblieben?','Ein Satz reicht.',2)+'<label class="chk"><input type="checkbox" data-t="bool" data-b="'+q+'.k"'+(e.k?' checked':'')+'><span>Das war ein Schlüsselmoment für mich</span></label>'+(e.k?ta(q+'.w','Inwiefern?','Was macht ihn für dich zum Schlüsselmoment?',2):'')+'</div>'}
     h+='</div>'});
    h+='</div>'}
   h+='</div>'});
  return h}
+function secTage(){return secTageN(1)}
+function secTage2(){return secTageN(2)}
 var EI_SUG=['Trainer','Verein','Region','Als Spieler','Vorbild','Andere Sportart'];
 var eiSel=null,eiDrag=null;
 function eiR(c){return 20+Math.max(0,Math.min(10,Number(c.s)||0))*5.5}
@@ -1005,12 +1103,18 @@ function viewModule(n){var h=modHead(n)+prevVors(n);
   h+='<h3 class="h">Passen Spielidee und ich zusammen?</h3>'+fitRows(S.m[1].sport).map(function(r){return rng('m.1.fit.'+r.k,r.t,r.l,r.r)}).join('')+ta('m.1.kn','Wo knirscht es zwischen mir und meiner Spielidee?','',3)+(indiv()?ta('m.1.pf','Für wen passt meine Spielidee gut, für wen weniger?','Zum Beispiel wegen Größe, Aufschlag, Athletik oder Spielverständnis',3):'');
  }
  if(n===2){
+  if(m1Empty())h+='<div class="card line"><h3 class="h" style="margin-top:0">Dein Modul 1 ist auf diesem Gerät leer</h3><p>Damit Modul 2 an deine Spielidee anknüpfen kann, lade hier dein PDF aus Modul 1 hoch.</p>'+sec('pdfres',secPdfRes)+'</div>';
+  h+='<h2 class="band">Die zwei Tage</h2><p class="sub">Halte fest, was bei dir hängen bleibt, am besten gleich im Programmpunkt.</p>'+sec('tage2',secTage2);
   h+='<h2 class="band">Meine Trainingsprinzipien</h2><p class="sub">Woran erkennt man, wie ich trainiere? Die Grundsätze, nach denen ich meine Einheiten baue.</p>'+tpHTML()+sec('zu',secZu);
-  h+='<h2 class="band">Meine Trainingseinheit</h2><p class="sub">Baue eine typische Einheit aus Bausteinen und passe sie an, sobald du im Modul neue Ideen bekommst.</p>'+sec('sess',secSess)+'<div style="margin-top:20px">'+ta('m.2.anders','Was plane ich künftig anders?','',3)+'</div>';
+  h+='<h2 class="band">Meine Trainingswoche</h2><p class="sub">Baue eine typische Woche aus Einheiten und Bausteinen und passe sie an, sobald du im Modul neue Ideen bekommst.</p>'+sec('week',secWeek);
+  h+='<h3 class="h">Passt meine Trainingsgestaltung zu meiner Spielidee?</h3>'+rng('m.2.pass.pass',ROWS2.pass[0].t,ROWS2.pass[0].l,ROWS2.pass[0].r);
+  h+='<h3 class="h">So bauen wir Leistung auf</h3><p class="hint">Nach der Pyramide aus dem Vortrag von Eric Johannesen, Deutscher Ruderverband. Wie bewusst planst du diese Ebenen?</p>'+ROWS2.sci.map(function(r){return rng('m.2.sci.'+r.k,r.t,r.l,r.r)}).join('')+ta('m.2.scin','Was fehlt noch in meiner Planung?','',3);
+  h+='<div style="margin-top:20px">'+ta('m.2.anders','Was plane ich künftig anders?','',3)+'</div>';
   h+='<h2 class="band">Mein Auftritt im Training</h2><p class="sub">Wie trete ich auf, und wie möchte ich auftreten?</p>';
   h+='<div class="grid2">'+ta('m.2.ka.t','Meine Kernaufgabe im Training','Wofür bin ich im Training vor allem da?',3)+ta('m.2.ka.w','Meine Kernaufgabe im Wettkampf','Wo unterscheidet sie sich?',3)+'</div>';
   h+=dual('au','m.2.au',['Heute','Mein Ziel'],ROWS.au,'Wo stehst du heute, und wo willst du hin?');
   h+='<h3 class="h">Trainingsbeobachtung</h3><p class="hint">Zähle in einer Einheit mit, live oder anhand einer Aufnahme. Oder bitte jemanden aus deinem Staff darum. Das Ergebnis ist oft überraschend.</p>'+sec('tally',secTally);
+  h+='<h2 class="band">Aufgabe bis Modul 3</h2><div class="card"><p style="margin-top:0">Zur Vorbereitung auf das nächste Modul filmst du eine Ansprache von dir, am besten vor dem Spiel oder in der Halbzeit.</p><label class="chk" style="margin:0"><input type="checkbox" data-t="bool" data-b="m.2.film"'+(S.m[2].film?' checked':'')+'><span>Ich habe meine Ansprache gefilmt</span></label></div>';
  }
  if(n===3){
   h+='<h2 class="band">Entscheidungslabor</h2><p class="sub">Wähle eine Situation und entscheide so, wie du es im Alltag tun würdest.</p>'+sec('dil',secDil);
@@ -1043,7 +1147,7 @@ function viewWeg(){var op=MODS.filter(function(m){return isOpen(m.n)}),h='<div c
  return h}
 function render(){if(/^[1-4]$/.test(S.ui.route)&&!isOpen(+S.ui.route))S.ui.route='start';var r=S.ui.route,v=$('#view');$('#pv').hidden=!S.ui.preview;v.innerHTML=r==='start'?viewStart():(r==='weg'?viewWeg():viewModule(Number(r)));
  $$('.tab').forEach(function(t){var tr=t.dataset.r;t.hidden=/^[1-4]$/.test(tr)&&!isOpen(+tr);var on=tr===String(r);t.classList.toggle('on',on);if(on)t.setAttribute('aria-current','page');else t.removeAttribute('aria-current')});post(v)}
-function post(root){if($('#eiCanvas'))drawEi();$$('textarea',root).forEach(grow);if($('#tlbar'))drawTimeline();if($('#radar'))drawRadar();if($('#gap'))gapText();
+function post(root){if($('#eiCanvas'))drawEi();$$('textarea',root).forEach(grow);if($('#tlbar'))drawTimeline();if($('#wkchart'))drawWeek();if($('#radar'))drawRadar();if($('#gap'))gapText();
  $$('img[data-fid]',root).forEach(function(img){DB.get(img.dataset.fid).then(function(b){if(b)img.src=URL.createObjectURL(b)})})}
 
 /* ---------- Export ---------- */
@@ -1091,13 +1195,17 @@ function pTracks1(c,rows,vals){var d=c.doc,x0=c.M+64,len=c.W-2*c.M-64-4;
 function pTP(c){var tp=tpList();if(!tp.length)return;pH3(c,'Meine Trainingsprinzipien');tp.forEach(function(x){pP(c,'- '+x.t)});
  var sp=S.m[1].pr.map(function(p,i){return {t:String(p).trim(),i:i}}).filter(function(x){return x.t});
  if(sp.length){pH3(c,'Spielprinzipien und Trainingsprinzipien');sp.forEach(function(x){var v=S.m[2].zu[x.i],y=tp.filter(function(t){return String(t.i)===String(v)})[0];pP(c,x.t+': '+(y?y.t:'noch nichts zugeordnet'))})}}
-function pSess(c){var L=S.m[2].ses;if(!L.length)return;var tot=L.reduce(function(s,b){return s+(b.min||0)},0);pH3(c,'Meine Trainingseinheit, insgesamt '+tot+' Minuten'+(S.m[2].md?', '+S.m[2].md:''));
- L.forEach(function(b){pP(c,b.min+' Min, '+b.t+(b.n?': '+b.n:'')+' (Intensität '+b.int+' von 5)')})}
-function pDays(c){var tg=S.m[1].tg||{},any=false;AG.forEach(function(a){a.r.forEach(function(r){var e=r.id&&tg[r.id];if(e&&(String(e.n).trim()||e.k)){if(!any){pH2(c,'Die zwei Tage');any=true}pH3(c,a.s+', '+r.t+': '+r.x+(e.k?' (Schlüsselmoment)':''));if(String(e.n).trim())pP(c,e.n);if(e.k&&String(e.w||'').trim())pP(c,'Inwiefern: '+e.w,true)}})})}
+function pWeekChart(c){var d=c.doc,st=WD.map(function(x){return wkStat(S.m[2].wk[x[0]])}),mx=Math.max.apply(null,st.map(function(q){return q.l}).concat([1])),H=32,w=c.W-2*c.M,bw=w/7;pEns(c,H+16);var y0=c.y+H+4;d.setFillColor(0);d.setDrawColor(120);d.setLineWidth(.3);d.setTextColor(0);d.setFont('helvetica','normal');d.setFontSize(8);
+ st.forEach(function(q,i){var h=q.l/mx*H,cx=c.M+i*bw+bw/2;if(h>0)d.rect(cx-bw*.28,y0-h,bw*.56,h,'F');d.text(String(Math.round(q.l)),cx,y0-h-1,{align:'center'});d.text(WD[i][2],cx,y0+4,{align:'center'})});d.line(c.M,y0,c.M+w,y0);c.y=y0+8}
+function pWeek(c){var wk=S.m[2].wk,sp=S.m[1].sport||'';if(!WD.some(function(d){return wk[d[0]].length}))return;pH3(c,'Meine Trainingswoche, Wettkampf am Samstag');pP(c,'Belastung pro Tag, also Minuten mal Intensität, ohne Pausen.',true);pWeekChart(c);
+ WD.forEach(function(d){var u=wk[d[0]];if(!u.length)return;var q=wkStat(u);pP(c,d[1]+', '+mdLab(d[3])+': '+q.z+' Minuten, Belastung '+Math.round(q.l)+', Intensität '+fmt1(q.i)+' von 5, kognitive Intensität '+fmt1(q.c)+' von 5');
+  u.forEach(function(e,i){pP(c,'Einheit '+(i+1)+(String(e.nm).trim()?', '+e.nm:''),true);e.b.forEach(function(b){pP(c,b.min+' Min, '+b.t+(b.n?': '+b.n:'')+' (Intensität '+b.int+', kognitiv '+(b.cog||3)+' von 5)'+fgPdf(b,sp),true)})})});
+ var ck=wkCheck();pH3(c,'Passt meine Woche zu meiner Spielidee?');ck.forEach(function(t){pP(c,t)})}
+function pDays(c,n){n=n||1;var tg=S.m[n].tg||{},any=false;AGS[n].forEach(function(a){a.r.forEach(function(r){var e=r.id&&tg[r.id];if(e&&(String(e.n).trim()||e.k)){if(!any){pH2(c,'Die zwei Tage');any=true}pH3(c,a.s+', '+r.t+': '+r.x+(e.k?' (Schlüsselmoment)':''));if(String(e.n).trim())pP(c,e.n);if(e.k&&String(e.w||'').trim())pP(c,'Inwiefern: '+e.w,true)}})})}
 async function pBuild(c,n){var m=MODS[n-1],M=S.m[n];
  pH1(c,'Modul '+n+': '+m.t);pP(c,m.d+', Stand '+today(),true);
  if(n>1){var pr=S.m[n-1].refl;if(String(pr.vors).trim()){pH3(c,'Mein Vorsatz aus Modul '+(n-1));pP(c,pr.vors+(pr.vdone?' (umgesetzt)':' (noch offen)'));pQ(c,'Was hat geklappt, was nicht?',pr.vnote)}}
- if(n===1)pDays(c);
+ if(n===1||n===2)pDays(c,n);
  pH2(c,['Das Was','Mein Training','Entscheiden','Die Person im Zentrum'][n-1]);
  if(n===1){
   pQ(c,'Meine Spielidee',M.idea);
@@ -1108,7 +1216,7 @@ async function pBuild(c,n){var m=MODS[n-1],M=S.m[n];
     if(dim){var w=Math.min(120,c.W-2*c.M),h=w*dim[1]/dim[0];if(h>110){h=110;w=h*dim[0]/dim[1]}pH3(c,'Bild: '+f.name);pEns(c,h+4);c.doc.addImage(u,/png/.test(f.type)?'PNG':'JPEG',c.M,c.y,w,h);c.y+=h+4}}}catch(e){}}
    else{pP(c,'Anhang: '+f.name+' (liegt in der Sicherungsdatei)',true)}}
  }
- if(n===2){pTP(c);pSess(c);pQ(c,'Das plane ich künftig anders',M.anders)}
+ if(n===2){pTP(c);pWeek(c);pH3(c,'Passt meine Trainingsgestaltung zu meiner Spielidee?');pTracks1(c,ROWS2.pass,M.pass);pH3(c,'So bauen wir Leistung auf');pTracks1(c,ROWS2.sci,M.sci);pQ(c,'Was fehlt noch in meiner Planung?',M.scin);pQ(c,'Das plane ich künftig anders',M.anders)}
  if(n===3){Object.keys(M.dl).forEach(function(i){var e=M.dl[i];if(!String(e.dec).trim()&&!String(e.gegen).trim())return;pH3(c,'Entscheidungslabor: '+DIL[i].t);pP(c,DIL[i].x,true);pQ(c,'Meine Entscheidung',e.dec);pP(c,CHK.map(function(q,j){return q+' '+e.c[j]+' von 10'}).join('\n'));pQ(c,'Das spricht dagegen',e.gegen)});
   M.dy.forEach(function(e){if(![e.sit,e.tat,e.wirk,e.next].some(function(x){return String(x).trim()}))return;pH3(c,'Situation vom '+e.date);pQ(c,'Was ist passiert?',e.sit);pQ(c,'Was habe ich getan und gesagt?',e.tat);pQ(c,'Was hat es ausgelöst?',e.wirk);pQ(c,'Beim nächsten Mal',e.next)})}
  if(n===4){M.pl.forEach(function(p,i){if(!p.k&&!p.rolle&&!p.feld&&!p.schritt&&!p.st.join('').trim())return;pH3(c,(p.k||('Person '+(i+1)))+(p.rolle?', '+p.rolle:''));
@@ -1117,7 +1225,7 @@ async function pBuild(c,n){var m=MODS[n-1],M=S.m[n];
  pH2(c,['Das Wie','Mein Auftritt im Training','Führen','Meine Rolle'][n-1]);
  if(n===1){pEi(c);if(M.vals.length){pH3(c,'Meine Werte');M.vals.forEach(function(v,i){pP(c,(i+1)+'. '+v)})}
   pH3(c,'Passen Spielidee und ich zusammen?');pTracks1(c,fitRows(M.sport),M.fit);pQ(c,'Wo es knirscht',M.kn);if(M.sport==='te')pQ(c,'Für wen die Spielidee passt',M.pf)}
- if(n===2){pQ(c,'Meine Kernaufgabe im Training',(M.ka||{}).t);pQ(c,'Meine Kernaufgabe im Wettkampf',(M.ka||{}).w);pH3(c,'Mein Auftritt im Training');pTracks(c,ROWS.au,M.au,['Heute','Mein Ziel']);
+ if(n===2){pQ(c,'Meine Kernaufgabe im Training',(M.ka||{}).t);pQ(c,'Meine Kernaufgabe im Wettkampf',(M.ka||{}).w);pH3(c,'Mein Auftritt im Training');pTracks(c,ROWS.au,M.au,['Heute','Mein Ziel']);if(M.film)pP(c,'Aufgabe bis Modul 3: Ansprache gefilmt.');
   M.tl.forEach(function(e){pH3(c,'Trainingsbeobachtung vom '+e.date);pP(c,(e.fr!==undefined?'Fragen '+e.fr:'Offene Fragen '+(e.fo||0)+', geschlossene Fragen '+(e.fg||0))+', Anweisungen '+e.an+', Lob '+e.lo+', Korrekturen '+e.ko+(e.nk!==undefined?', negative Kritik '+e.nk:'')+(e.note?'\n'+e.note:''))})}
  if(n===3){pH3(c,'Mein Führungskompass');pTracks1(c,ROWS.ko,M.ko);
   var lf=M.lf;if(Object.keys(lf).some(function(k){return String(lf[k]).trim()})){pH3(c,'Mein Leitfaden für schwierige Gespräche');pQ(c,'Mein Ziel',lf.ziel);pQ(c,'Mein erster Satz',lf.ein);pQ(c,'Das will ich sagen',lf.sag);pQ(c,'Das will ich hören',lf.hoer);pQ(c,'Wenn es kippt',lf.esk);pQ(c,'So beende ich das Gespräch',lf.abs)}
@@ -1164,7 +1272,7 @@ function arm(b,fn){if(b.dataset.armed){fn();return}b.dataset.armed='1';var o=b.t
 function hook(id){if(id==='kompass')drawRadar();if(id==='ro')gapText()}
 document.addEventListener('input',function(e){var t=e.target,p=t.dataset&&t.dataset.b;if(!p)return;var v;
  if(t.type==='checkbox')v=t.checked;else if(t.dataset.t==='num'||t.type==='range'||t.type==='number')v=Number(t.value)||0;else v=t.value;
- setP(p,v);if(t.tagName==='TEXTAREA')grow(t);save();if(p.indexOf('m.1.ei.')===0)drawEi();if(/^m\.1\.tg\.[a-z0-9]+\.k$/.test(p))refresh('tage');if(p.indexOf('m.2.tp.')===0||p.indexOf('m.2.zu.')===0)refresh('zu');if(t.dataset.d)hook(t.dataset.d);if(p.indexOf('m.1.sl.')===0){var cmx=$('#coachm');if(cmx)cmx.innerHTML=coachHTML(S.m[1].sl,S.m[1].sport)}if(t.closest('[data-sec="sess"]'))drawTimeline();
+ setP(p,v);if(t.tagName==='TEXTAREA')grow(t);save();if(p.indexOf('m.1.ei.')===0)drawEi();var tgm=p.match(/^m\.([12])\.tg\.[a-z0-9]+\.k$/);if(tgm)refresh(tgm[1]==='1'?'tage':'tage2');if(p.indexOf('m.2.tp.')===0||p.indexOf('m.2.zu.')===0)refresh('zu');if(t.dataset.d)hook(t.dataset.d);if(p.indexOf('m.1.sl.')===0){var cmx=$('#coachm');if(cmx)cmx.innerHTML=coachHTML(S.m[1].sl,S.m[1].sport)}if(p.indexOf('m.2.ov.')===0){S.m[2].ov.on=true;drawWeek()}if(t.closest('[data-sec="week"]')){var bl=t.closest('.blk');if(bl&&bl.dataset.q){var fm=bl.querySelector('.fgm'),bo=getP(bl.dataset.q);if(fm&&bo)fm.textContent=fgText(bo,S.m[1].sport||'')}drawTimeline();drawWeek();if(/\.nm$/.test(p)){var ch=$$('[data-act="wkein"]')[wkEin];if(ch)ch.textContent='Einheit '+(wkEin+1)+(String(v).trim()?': '+String(v).trim().slice(0,24):'')}}
  if(p==='m.4.pl.'+S.m[4].pi+'.k'){var tab=$$('[data-act="plsel"]')[S.m[4].pi];if(tab)tab.textContent=v||('Person '+(S.m[4].pi+1))}});
 document.addEventListener('keydown',function(e){if(e.key==='Enter'&&e.target.dataset&&e.target.dataset.en){e.preventDefault();var k=e.target.dataset.en,v=e.target.value.trim();if(v){S.m[3].en[k].push(v);save();refresh('energy')}}
  if(e.key==='Enter'&&e.target.id==='valIn'){e.preventDefault();act('valadd',e.target)}});
@@ -1178,7 +1286,11 @@ function act(a,b){var d=b.dataset,sc=b.closest('[data-sec]'),sn=sc&&sc.dataset.s
  case 'dmode':S.ui.dm[d.id]=Number(d.i);save();var el=$('[data-dual="'+d.id+'"]');el.outerHTML=dualHTML(d.id);hook(d.id);break;
  case 'mv':var arr=getP(d.path),i=+d.i,j=i+(+d.dir);if(j>=0&&j<arr.length){var x=arr[i];arr[i]=arr[j];arr[j]=x;save();refresh(sn)}break;
  case 'rm':arm(b,function(){var arr=getP(d.path);arr.splice(+d.i,1);if(d.path==='m.4.pl'){if(!arr.length)arr.push(newPlayer());S.m[4].pi=Math.min(S.m[4].pi,arr.length-1);refresh('plwas');refresh('plwie')}else{refresh(sn)}save()});break;
- case 'addblock':S.m[2].ses.push({id:uid(),t:d.t,n:'',min:d.t==='Pause'?5:15,int:d.t==='Pause'||d.t==='Ankommen'?1:3});save();refresh('sess');break;
+ case 'addblock':var ce=curEin();if(ce){ce.b.push(newBlock(d.t));save();refresh('week')}break;
+ case 'wkday':wkSel=d.d;wkEin=0;refresh('week');break;
+ case 'wkein':wkEin=+d.i;refresh('week');break;
+ case 'wkaddein':var uu=S.m[2].wk[wkSel];if(uu.length<2){uu.push(newEin());wkEin=uu.length-1;save();refresh('week')}break;
+ case 'wkcopy':var tg2=$('#wkcp').value,src=S.m[2].wk[wkSel],dst=S.m[2].wk[tg2];if(!src||!src.length||!dst)break;var doCp=function(){S.m[2].wk[tg2]=JSON.parse(JSON.stringify(src)).map(function(e){e.id=uid();e.b.forEach(function(x){x.id=uid()});return e});wkSel=tg2;wkEin=0;save();refresh('week');toast('Tag kopiert')};if(dst.length)arm(b,doCp);else doCp();break;
  case 'tally':var tc=S.m[2].tc;tc[d.k]=Math.max(0,(tc[d.k]||0)+(+d.d));save();refresh('tally');break;
  case 'tsave':var c=S.m[2].tc;if(!((c.fo||0)+(c.fg||0)+(c.an||0)+(c.lo||0)+(c.ko||0)+(c.nk||0))&&!S.m[2].tn.trim()){toast('Zähle zuerst etwas mit.');break}S.m[2].tl.unshift({id:uid(),date:today(),fo:c.fo||0,fg:c.fg||0,an:c.an||0,lo:c.lo||0,ko:c.ko||0,nk:c.nk||0,note:S.m[2].tn});S.m[2].tc={fo:0,fg:0,an:0,lo:0,ko:0,nk:0};S.m[2].tn='';save();refresh('tally');toast('Beobachtung gespeichert');break;
  case 'valt':var v=S.m[1].vals,ix=v.indexOf(d.v);if(ix>-1)v.splice(ix,1);else if(v.length<5)v.push(d.v);else{toast('Maximal fünf Werte. Nimm zuerst einen raus.');break}save();refresh('vals');break;
@@ -1196,9 +1308,9 @@ function act(a,b){var d=b.dataset,sc=b.closest('[data-sec]'),sn=sc&&sc.dataset.s
  case 'eiadd':var E=S.m[1].ei;if(E.length>=12){toast('Mehr als zwölf Einflüsse gehen nicht.');break}var an=(E.length*67%360)*Math.PI/180,rd=110+(E.length%2)*25,nc={id:uid(),t:d.v,n:'',s:5,neu:false,pr:{},x:190+Math.cos(an)*rd,y:190+Math.sin(an)*rd},rr=eiR(nc);nc.x=Math.max(rr,Math.min(380-rr,nc.x));nc.y=Math.max(rr,Math.min(380-rr,nc.y));E.push(nc);eiSel=nc.id;save();refresh('ei');break;
  case 'eisel':eiSel=d.id;refresh('ei');break;
  case 'sport':S.m[1].sport=(S.m[1].sport===d.k?'':d.k);save();var sy=window.scrollY;render();window.scrollTo(0,sy);break;
- case 'agtoggle':tgOpen[d.id]=!tgOpen[d.id];refresh('tage');break;
+ case 'agtoggle':tgOpen[d.id]=!tgOpen[d.id];refresh((+d.n||1)===1?'tage':'tage2');break;
  case 'zoom':var im=b.src||'';if(im){var lb=document.createElement('div');lb.className='lb';lb.innerHTML='<img alt="Vergrößerte Ansicht" src="'+im+'"><button class="btn" type="button">Schließen</button>';lb.addEventListener('click',function(){lb.remove()});document.body.appendChild(lb)}break;
- case 'daytoggle':if(!dayOpen)secTage();dayOpen[d.i]=!dayOpen[d.i];refresh('tage');break;
+ case 'daytoggle':var dn=+d.n||1,om=openMap(dn);om[d.i]=!om[d.i];refresh(dn===1?'tage':'tage2');break;
  case 'pdf':makePDF(Number(d.n));break;
  case 'pdfall':makePDF(0);break;
  case 'pdfpick':$('#pdfIn').click();break;
